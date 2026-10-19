@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OASIS – Xe cà phê</title>
+<meta name="description" content="OASIS – xe cà phê nhỏ, pha mới mỗi ngày với thật nhiều tâm huyết.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --white:#fffdf9;
+    --cream:#f6efe4;
+    --brown:#3b2418;
+    --brown-2:#5a3a28;
+    --green:#4a6b4f;
+    --green-2:#7a9b72;
+    --radius:20px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Nunito',sans-serif;
+    color:var(--brown);
+    background:var(--white);
+    overflow-x:hidden;
+    line-height:1.6;
+  }
+  h1,h2,h3{font-family:'Playfair Display',serif;font-weight:700}
+
+  /* ===== Animated gradient background ===== */
+  .bg{
+    position:fixed;inset:0;z-index:-2;
+    background:linear-gradient(120deg,#fffdf9,#eef3e8,#f3e7d8,#e4ecdc,#fffdf9);
+    background-size:400% 400%;
+    animation:flow 22s ease infinite;
+  }
+  @keyframes flow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+  /* floating blobs + beans (parallax via JS) */
+  .floaters{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+  .blob{
+    position:absolute;border-radius:50%;filter:blur(60px);opacity:.45;
+    animation:drift 18s ease-in-out infinite alternate;
+  }
+  .blob.b1{width:380px;height:380px;background:var(--green-2);top:-80px;left:-100px}
+  .blob.b2{width:340px;height:340px;background:#c8a07a;bottom:5%;right:-90px;animation-delay:-6s}
+  .blob.b3{width:260px;height:260px;background:#b9d0b0;top:45%;left:30%;animation-delay:-11s}
+  @keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(50px,40px) scale(1.15)}}
+  .bean{position:absolute;width:26px;height:38px;border-radius:50%;background:var(--brown-2);opacity:.12;will-change:transform}
+  .bean::after{content:"";position:absolute;left:50%;top:6%;bottom:6%;width:3px;background:var(--cream);transform:translateX(-50%) rotate(12deg);border-radius:3px}
+
+  /* ===== Scroll progress + nav ===== */
+  .progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--green);z-index:100}
+  nav{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:18px 5vw;transition:.35s;
+  }
+  nav.scrolled{background:rgba(255,253,249,.85);backdrop-filter:blur(10px);padding:10px 5vw;box-shadow:0 4px 20px rgba(59,36,24,.08)}
+  .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--brown);text-decoration:none}
+  .logo span{color:var(--green)}
+  nav ul{display:flex;gap:28px;list-style:none}
+  nav a.link{color:var(--brown);text-decoration:none;font-weight:600;position:relative}
+  nav a.link::after{content:"";position:absolute;left:0;bottom:-4px;height:2px;width:0;background:var(--green);transition:.3s}
+  nav a.link:hover::after{width:100%}
+
+  /* ===== Hero ===== */
+  .hero{
+    min-height:100vh;display:grid;place-items:center;text-align:center;
+    padding:120px 6vw 80px;position:relative;
+  }
+  .hero-inner{max-width:720px}
+  .tag{
+    display:inline-block;padding:6px 16px;border-radius:999px;
+    background:rgba(74,107,79,.12);color:var(--green);font-weight:700;font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;
+  }
+  .hero h1{font-size:clamp(2.6rem,8vw,5rem);line-height:1.1;margin:18px 0}
+  .hero h1 em{color:var(--green);font-style:italic}
+  .hero p{font-size:1.15rem;color:var(--brown-2);max-width:520px;margin:0 auto 32px}
+  .btn{
+    display:inline-block;padding:14px 32px;border-radius:999px;text-decoration:none;font-weight:700;
+    background:var(--brown);color:var(--white);transition:.3s;box-shadow:0 8px 24px rgba(59,36,24,.25);
+  }
+  .btn:hover{background:var(--green);transform:translateY(-3px)}
+  .btn.ghost{background:transparent;color:var(--brown);border:2px solid var(--brown);box-shadow:none;margin-left:10px}
+  .btn.ghost:hover{background:var(--brown);color:var(--white)}
+  .scroll-hint{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);font-size:.8rem;letter-spacing:.2em;color:var(--brown-2);text-transform:uppercase}
+  .scroll-hint::after{content:"";display:block;width:2px;height:36px;background:var(--green);margin:8px auto 0;animation:line 1.8s infinite}
+  @keyframes line{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+  /* ===== Sections ===== */
+  section{padding:90px 6vw;max-width:1150px;margin:0 auto}
+  .sec-title{text-align:center;margin-bottom:50px}
+  .sec-title h2{font-size:clamp(2rem,5vw,3rem)}
+  .sec-title p{color:var(--brown-2)}
+  .sec-title .line{width:60px;height:3px;background:var(--green);margin:14px auto 0;border-radius:3px}
+
+  /* About / images */
+  .about{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center}
+  .about h2{font-size:clamp(1.8rem,4vw,2.6rem);margin-bottom:16px}
+  .about p{color:var(--brown-2);margin-bottom:14px}
+  .img-stack{position:relative;height:420px}
+  .img-stack .img{
+    position:absolute;border-radius:var(--radius);overflow:hidden;
+    box-shadow:0 20px 40px rgba(59,36,24,.2);
+    background:linear-gradient(135deg,var(--green-2),var(--brown-2));
+  }
+  .img-stack img{width:100%;height:100%;object-fit:cover;display:block}
+  .ph{
+    width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+    color:var(--white);font-weight:700;letter-spacing:.08em;
+    background:repeating-linear-gradient(45deg,rgba(255,255,255,.07) 0 12px,transparent 12px 24px);
+  }
+  .ph span{font-size:2.2rem}
+  .img-stack .i1{width:62%;height:75%;top:0;left:0}
+  .img-stack .i2{width:55%;height:60%;bottom:0;right:0;border:6px solid var(--white)}
+
+  /* Menu */
+  #menu-tabs{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:36px}
+  .tab{
+    border:2px solid var(--brown);background:transparent;color:var(--brown);
+    padding:8px 22px;border-radius:999px;font:700 .95rem 'Nunito',sans-serif;cursor:pointer;transition:.25s;
+  }
+  .tab.active,.tab:hover{background:var(--brown);color:var(--white)}
+  #menu-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px}
+  .item{
+    background:rgba(255,255,255,.75);backdrop-filter:blur(6px);
+    border-radius:var(--radius);padding:22px 24px;border:1px solid rgba(74,107,79,.15);
+    transition:.3s;
+  }
+  .item:hover{transform:translateY(-6px);box-shadow:0 16px 34px rgba(59,36,24,.13)}
+  .item-top{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+  .item h3{font-size:1.2rem}
+  .price{font-weight:800;color:var(--green);white-space:nowrap}
+  .dots{flex:1;border-bottom:2px dotted rgba(59,36,24,.25);transform:translateY(-4px)}
+  .item p{font-size:.92rem;color:var(--brown-2);margin-top:6px}
+
+  /* Info */
+  .info{display:grid;grid-template-columns:1fr 1.3fr;gap:30px}
+  .card{background:var(--brown);color:var(--cream);border-radius:var(--radius);padding:36px;box-shadow:0 20px 40px rgba(59,36,24,.25)}
+  .card h3{font-size:1.6rem;margin-bottom:22px;color:var(--white)}
+  .row{display:flex;gap:14px;margin-bottom:20px}
+  .row .ic{flex:0 0 38px;height:38px;border-radius:50%;background:var(--green);display:grid;place-items:center;font-size:1.05rem}
+  .row b{display:block;color:var(--white)}
+  .row a{color:var(--cream)}
+  .map{border-radius:var(--radius);overflow:hidden;min-height:340px;box-shadow:0 20px 40px rgba(59,36,24,.18);border:4px solid var(--white)}
+  .map iframe{width:100%;height:100%;min-height:340px;border:0;display:block}
+
+  footer{text-align:center;padding:40px 6vw 50px;color:var(--brown-2);font-size:.92rem}
+  footer .logo{display:inline-block;margin-bottom:6px}
+
+  /* ===== Scroll reveal ===== */
+  .reveal{opacity:0;transform:translateY(40px);transition:opacity .9s ease,transform .9s ease}
+  .reveal.left{transform:translateX(-50px)}
+  .reveal.right{transform:translateX(50px)}
+  .reveal.show{opacity:1;transform:none}
+
+  /* ===== Responsive ===== */
+  @media(max-width:820px){
+    nav ul{gap:16px}
+    nav ul li.hide-m{display:none}
+    .about,.info{grid-template-columns:1fr}
+    .img-stack{height:340px}
+    section{padding:70px 5vw}
+    .btn.ghost{margin:12px 0 0}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    .reveal{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="bg"></div>
+<div class="floaters" id="floaters">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+</div>
+
+<nav id="nav">
+  <a href="#home" class="logo">OASIS</a>
+  <ul>
+    <li><a class="link" href="#menu">Thực đơn</a></li>
+    <li class="hide-m"><a class="link" href="#about">Giới thiệu</a></li>
+    <li><a class="link" href="#visit">Ghé thăm</a></li>
+  </ul>
+</nav>
+
+<header class="hero" id="home">
+  <div class="hero-inner" data-speed="0.15">
+    <span class="tag">Xe nhỏ · Hương vị lớn</span>
+    <h1>Cà phê thơm,<br><em>khoảnh khắc</em> thân thương.</h1>
+    <p>Ly cà phê pha thủ công từ chiếc xe nhỏ của OASIS đến tay bạn. Ghé chào một tiếng, cầm một ly và bắt đầu ngày mới thật tươi.</p>
+    <a href="#menu" class="btn">Xem thực đơn</a>
+    <a href="#visit" class="btn ghost">Tìm chúng mình</a>
+  </div>
+  <div class="scroll-hint">Cuộn xuống</div>
+</header>
+
+<section id="menu">
+  <div class="sec-title reveal">
+    <h2>Thực đơn</h2>
+    <p>Đơn giản, chân thành, thơm ngon.</p>
+    <div class="line"></div>
+  </div>
+  <div id="menu-tabs" class="reveal"></div>
+  <div id="menu-list"></div>
+</section>
+
+<section class="about" id="about">
+  <div class="reveal left">
+    <h2>Pha bằng sự chăm chút,<br>phục vụ bằng nụ cười.</h2>
+    <p>OASIS là một chiếc xe cà phê nhỏ với ý tưởng giản dị: hạt cà phê ngon, giá thân thiện và lời chào ấm áp cho tất cả những ai ghé ngang.</p>
+    <p>Mỗi ly đều được pha mới khi bạn gọi. Ghé buổi sáng để nạp năng lượng, hoặc buổi chiều để có một khoảng nghỉ chậm rãi, ngọt ngào.</p>
+  </div>
+  <div class="img-stack reveal right">
+    <!-- Thay khung bên dưới bằng ảnh thật: <img src="anh1.jpg" alt="Mô tả ảnh"> -->
+    <div class="img i1" data-speed="-0.05"><div class="ph"><span>📷</span>Ảnh 1</div></div>
+    <div class="img i2" data-speed="0.06"><div class="ph"><span>📷</span>Ảnh 2</div></div>
+  </div>
+</section>
+
+<section id="visit">
+  <div class="sec-title reveal">
+    <h2>Ghé thăm OASIS</h2>
+    <p>Tìm xe cà phê và chào chúng mình nhé.</p>
+    <div class="line"></div>
+  </div>
+  <div class="info">
+    <div class="card reveal left">
+      <h3>Liên hệ & Giờ mở cửa</h3>
+      <div class="row"><div class="ic">📍</div><div><b>Địa chỉ</b>123 Tên đường, Phường/Quận, Thành phố</div></div>
+      <div class="row"><div class="ic">📞</div><div><b>Điện thoại</b><a href="tel:+0000000000">0000 000 000</a></div></div>
+      <div class="row"><div class="ic">🕖</div><div><b>Giờ mở cửa</b>Thứ 2 – Thứ 7: 6:30 – 18:00<br>Chủ nhật: 7:00 – 16:00</div></div>
+      <div class="row"><div class="ic">✉️</div><div><b>Email / Mạng xã hội</b><a href="mailto:hello@example.com">hello@example.com</a></div></div>
+    </div>
+    <div class="map reveal right">
+      <!-- Thay giá trị q= bằng địa chỉ thật của bạn -->
+      <iframe loading="lazy" title="Bản đồ"
+        src="https://www.google.com/maps?q=123+Your+Street&output=embed"></iframe>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <a href="#home" class="logo">OASIS</a>
+  <div>© <span id="year"></span> OASIS – Xe cà phê. Làm bằng ☕ và thật nhiều yêu thương.</div>
+</footer>
+
+<script>
+/* ===== DỮ LIỆU THỰC ĐƠN – sửa tại đây (giá tính bằng nghìn đồng) ===== */
+const MENU = {
+  "Cà phê": [
+    { name: "Cà phê đen",     price: "13k", desc: "" },
+    { name: "Cà phê sữa đá",  price: "15k · Lớn 17k", desc: "" },
+    { name: "Bạc xỉu nóng",   price: "14k", desc: "" },
+    { name: "Bạc xỉu đá",     price: "15k", desc: "" }
+  ],
+  "Nước ép": [
+    { name: "Cam", price: "15k", desc: "" }
+  ]
+};
+
+const tabsEl = document.getElementById('menu-tabs');
+const listEl = document.getElementById('menu-list');
+
+function renderMenu(cat){
+  listEl.innerHTML = MENU[cat].map((m,i)=>`
+    <div class="item reveal" style="transition-delay:${i*80}ms">
+      <div class="item-top"><h3>${m.name}</h3><span class="dots"></span><span class="price">${m.price}</span></div>
+      ${m.desc ? `<p>${m.desc}</p>` : ''}
+    </div>`).join('');
+  requestAnimationFrame(()=>listEl.querySelectorAll('.reveal').forEach(el=>el.classList.add('show')));
+}
+Object.keys(MENU).forEach((cat,i)=>{
+  const b=document.createElement('button');
+  b.className='tab'+(i===0?' active':''); b.textContent=cat;
+  b.onclick=()=>{
+    tabsEl.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    b.classList.add('active'); renderMenu(cat);
+  };
+  tabsEl.appendChild(b);
+});
+renderMenu(Object.keys(MENU)[0]);
+
+/* ===== Floating coffee beans ===== */
+const floaters=document.getElementById('floaters');
+const beans=[];
+for(let i=0;i<14;i++){
+  const b=document.createElement('div');
+  b.className='bean';
+  b.style.left=Math.random()*100+'%';
+  b.style.top=Math.random()*100+'%';
+  const s=.6+Math.random()*1.1;
+  b.dataset.speed=(Math.random()*.25+.05)*(Math.random()>.5?1:-1);
+  b.dataset.rot=Math.random()*360;
+  b.dataset.s=s;
+  floaters.appendChild(b); beans.push(b);
+}
+
+/* ===== Scroll effects ===== */
+const nav=document.getElementById('nav');
+const progress=document.getElementById('progress');
+const parallaxEls=document.querySelectorAll('[data-speed]');
+let ticking=false;
+
+function onScroll(){
+  const y=window.scrollY;
+  const max=document.documentElement.scrollHeight-innerHeight;
+  progress.style.width=(y/max*100)+'%';
+  nav.classList.toggle('scrolled',y>40);
+  beans.forEach(b=>{
+    b.style.transform=`translateY(${y*b.dataset.speed}px) rotate(${+b.dataset.rot+y*.08}deg) scale(${b.dataset.s})`;
+  });
+  parallaxEls.forEach(el=>{
+    el.style.transform=`translateY(${y*el.dataset.speed}px)`;
+  });
+  ticking=false;
+}
+addEventListener('scroll',()=>{ if(!ticking){requestAnimationFrame(onScroll);ticking=true;} },{passive:true});
+onScroll();
+
+/* ===== Reveal on scroll ===== */
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting){e.target.classList.add('show');io.unobserve(e.target);} });
+},{threshold:.15});
+document.querySelectorAll('.reveal').forEach(el=>{ if(!el.closest('#menu-list')) io.observe(el); });
+
+document.getElementById('year').textContent=new Date().getFullYear();
+</script>
+</body>
+</html>
